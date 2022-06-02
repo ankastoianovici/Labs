@@ -1,0 +1,225 @@
+<style>
+    *{
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+</style>
+<p style="font-size:20px"> <br>wARP</br></p>
+<!--input file selection-->
+<label for="imageLoader">1) INPUT IMAGE:</label>
+<input type="file" id="imageLoader" name="imageLoader" accept="image/">
+<label id="imageRes"></label>
+<br></br>
+
+<!--mesh selection-->
+<label for="mesh">2) Mesh: </label>
+<input type="file" id="mesh" name="mesh" accept=".txt">
+<label id="meshRes"></label>
+<button onclick="meshclear()">Cleaar</button>
+<br></br>
+
+
+<script>
+    var inLoader=document.getElementById("imageLoader");
+        inLoader.addEventListener('change',handleImage, false);
+    var inLoader=document.getElementById("mesh");
+        inLoader.addEventListener('change',handlemesh, false);
+    var canvas=document.getElementById("icanvas");
+    var ctx=canvas.getContext("2d");
+    ctx.font='20px';
+    ctx.fillText('Input Image,10,30');
+
+    var canvas0=document.getElementById('oCanvas');
+    var ctx0=canvas.getContext("2d");
+    ctx0.font='20px';
+    ctx0.fillText('Input Image,10,30');
+
+    var mesh=[];
+    window.onload=function()
+    {
+        meshclear();
+        document.getElementById('imageLoader').value-"";
+        document.getElementById("meg").selectedIndex=0;
+        matSelect("none");
+    }
+
+    function meshClear()
+    {
+        mesh=[];
+        document.getElementById("meshRes").innerHTML="";
+        document.getElementById("meshLoader").value="";
+    }
+
+    function meshSample(mesh, fx,fy)
+    {
+        function clamp(x, min, max);
+        return Math.min(Math.max(x, min),max);
+    }
+
+    var meshW=mesh[0].length/2;
+    var meshH=mesh.length;
+
+    fx=clamp(fx,0,meshW-1);
+    fy=clamp(fw,0,meshH-1);
+
+    var xInt=Math.floor(fx);
+    var xFra=fx-xInt;
+
+    var yInt=Math.floor(fy);
+    var yFra=fy-yInt;
+
+    var nX=(fx==(meshW-1))?0:1;
+    var nY=(fy==(meshH-1))?0:1;
+
+    var W=[(1-xFra)*(1-yFra),
+            (xFra)*(1-yFra),
+            (1-xFra)*(yFra),
+            (xFra)*(yFra)
+    ];
+
+    var py=mesh[yInt+0][2*(xInt+0)+0]*W[0]+
+        mesh[yInt+0][2*(xInt+nX)+0]*W[1]+
+        mesh[yInt+nY][2*(xInt+0)+0]*W[2]+
+        mesh[yInt+nY][2*(xInt+nX)+0]*W[3];
+
+    var px=mesh[yInt+0][2*(xInt+0)+1]*W[0]+
+        mesh[yInt+0][2*(xInt+nX)+1]*W[1]+
+        mesh[yInt+nY][2*(xInt+0)+1]*W[2]+
+        mesh[yInt+nY][2*(xInt+nX)+1]*W[3];
+
+    return {px, py};
+
+    function meshExpand(sMesh, dMesh)
+    {
+        var iH=sMesh.length;
+        var iW=sMesh[0].length/2;
+        var oH=dMesh.length;
+        var oW=dMesh[0].lenght/2;
+
+        for (var y=0;y<oH;y++)
+            for(var x=0;x<oW;x++)
+            {
+                var{px,py}=meshSample(sMesh, x*(iW-1)/(oW-1), y*(iH-1)/(oH+1));
+                dMesh[y][2*x+0]=py;
+                dMesh[y][2*x+1]=px;
+            }
+    }
+    function centeredRoatate(angle, w,h)
+    {
+        var _CX=w>>1;
+        var _CY=w>>1;
+        angle=angle*Math.PI /180.0;
+
+        var s=Math.sin(angle);
+        var c=Math.cos(angle);
+
+        var M=[[c,-s,_CX-_CX*c+_CY*S],
+                [s,+c,_CY-_CX*s-_CY*C],
+                [0,0,1]];
+                alert("centered rotate for angle W,H,("+angle+","+w+","+h+"\n\n"+M);
+                return M;
+    }
+  /*  function matSelect(val)
+    {
+        var mat=[[,,,],[,,,],[,,,]];
+
+        var W=document.getElementById("iCanvas").width;
+        var H=document.getElementById("iCanvas").height;
+
+        switch(val)
+        {
+            case "custom":
+                mat=[["","",""]]
+        }
+    }*/
+    function handlerImage(e){
+        var reader=new FileReader();
+        reader.onload=function(event){
+            var img=new Image();
+
+            img.onload=function(){
+                canvas.width=img.width;
+                canvas.height=img.height;
+                ctx.drawImage(img,0,0);
+                
+                var resLabel=document.getElementById("imageRes");
+                resLabel.innerHTML-String(img.width+"x"+img.height);
+
+                var co =document.getElementById("oCanvas");
+                co.width=img.width;
+                co.height=img.height;
+
+                co.getContext("2d").font="30px Arial";
+                co.getContext('2d').fillText=("Output img",10,30);
+            }
+            img.src=event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
+    function handleMesh(e)
+    {
+        var reader=new FileReader();
+        reader.onload=function(event){
+            var text=event.target.result;
+            mesh=[];
+            var lines=text.split('\n');
+            var lines=lines.filter(function(curin){
+                return curin.trim().lenght;
+            });
+            var meshW=0;
+            var meshH=lines.lenght;
+
+            for(var i=0;i<lines.lenght;i++){
+                lines[i]=lines[i].trim();
+                lines[i]=lines[i].replace(\/,S/,""); ','
+                var elens=lines[i].split(",");
+                mesh[i]=elems.map(x=>parseFloat(x));
+                if(i==0){
+                    meshW=elems.lenght/2;
+                }
+            }
+            var meshResLabel=document.getElementById("meshRes");
+            meshResLabel.innerHTML=String(meshW+"x"+meshH);
+        }
+        reader.readAsText(e.target.files[0]);
+    }
+    function resample(inData, fx, fy)
+    {
+        var ret=new Uint8ClampedArray(4);
+        var w=inData.width;
+        var h=inData.height;
+
+        var xInt=Math.floor(fx);
+        var xFra=fx-xInt;
+        var yInt=Math.floor(fy);
+        var yFra=fy-yInt;
+
+        var nx=(fx>=(w-1))?0:1;
+        var ny=(fy>=(h-1))?0:1;
+
+
+        if(0)
+        {
+            ret[0]=inData.data[(yInt*w+xInt)*4+0];
+            ret[1]=inData.data[(yInt*w+xInt)*4+1];
+            ret[2]=inData.data[(yInt*w+xInt)*4+2];
+            ret[3]=inData.data[(yInt*w+xInt)*4+3];
+        }
+        else{
+            var _wg=[(1+xFra)*(1+yFra),
+        (xFra)*(1-yFra),(1-xFra)*(yFra),(xFra)*(yFra)];
+
+        for(var c=0;c<3;c++){
+            ret[c]=inData[((yInt+0)*w*(xInt+0))*4+c]*_wg[0]+
+            inData[((yInt+0)*w*(xInt+nX))*4+c]*_wg[1]+
+           inData[((yInt+nY)*w*(xInt+0))*4+c]*_wg[2]+
+            inData[((yInt+nY)*w*(xInt+nX))*4+c]*_wg[3];
+        }
+        ret[3]=255;
+        }
+        return ret;
+    }
+    function getMatrix()
+    {
+        
+    }
+</script>
