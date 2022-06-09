@@ -1,0 +1,12 @@
+from PIL import Image
+import os
+
+img = Image.open("C:\\Users\\ankas\\OneDrive\\Desktop\\shape.jpg")
+#print("Dimensiune inainte : ", end = "")
+#print(os.path.getsize("C:\\Users\\ankas\\OneDrive\\Desktop\\tr.png"))
+
+rgb_im = img.convert("RGB")
+
+rgb_im.save("C:\\Users\\ankas\\OneDrive\\Desktop\\shape.jpeg")
+#print("Dimensiune dupa : ", end = "")
+#print(os.path.getsize("C:\\Users\\ankas\\OneDrive\\Desktop\\tr.jpeg"))
